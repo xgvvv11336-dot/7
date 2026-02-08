@@ -1,14 +1,22 @@
-name: Windows-RDP
+name: Windows-CRD
 on: workflow_dispatch
 jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Set up Remote Desktop
+    - name: Setup & Run Windows
+      shell: powershell
       run: |
-        $authCode = "ใส่รหัสของลักษณ์จาก_GOOGLE_ที่นี่"
+        # 1. โหลดตัวติดตั้ง
         Invoke-WebRequest -Uri https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi -OutFile crd.msi
+        
+        # 2. ติดตั้ง (ใช้ msiexec จะไม่ Error เหมือนในรูป)
         Start-Process msiexec.exe -Wait -ArgumentList "/i crd.msi /qn"
-        & "${Env:ProgramFiles(x86)}\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="$authCode" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$Env:COMPUTERNAME --pin=123456
-    - name: Keep Alive
-      run: Start-Sleep -Seconds 21600
+        
+        # 3. รันระบบ (เอา Code จาก Google มาใส่ตรงบรรทัดล่างนี้)
+        $Env:CRP_AUTH_CODE = "ใส่รหัสตัวเลขจาก_GOOGLE_ที่นี่"
+        & "${Env:ProgramFiles(x86)}\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="$Env:CRP_AUTH_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$Env:COMPUTERNAME --pin=123456
+        
+        # 4. ป้องกันเครื่องดับ
+        Write-Host "Windows Ready! Check your App."
+        Start-Sleep -Seconds 21600
