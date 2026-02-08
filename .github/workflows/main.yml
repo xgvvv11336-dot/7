@@ -1,30 +1,14 @@
-name: Windows-CRD
-
-on: 
-  workflow_dispatch:
-
+name: Windows-RDP
+on: workflow_dispatch
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 360
-
     steps:
-    - name: Download & Install Chrome Remote Desktop
+    - name: Set up Remote Desktop
       run: |
-        dotnet user-secrets set "CRD_AUTH_CODE" "${{ github.event.inputs.authcode }}"
-        Invoke-WebRequest -Uri https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi -OutFile chromeremotedesktophost.msi
-        Start-Process msi-installer -Wait -ArgumentList "/i chromeremotedesktophost.msi /qn"
-        
-    - name: Activate Chrome Remote Desktop
-      shell: powershell
-      run: |
-        # ใส่คำสั่งจาก Google ที่คุณก๊อปมาลงในส่วนนี้ หรือใช้รหัสผ่านที่ตั้งไว้
-        # ตัวอย่างคำสั่งที่จะรัน (ต้องเปลี่ยนตามรหัสของคุณ):
-        $Env:CRP_AUTH_CODE = "${{ github.event.inputs.authcode }}"
-        & "${Env:ProgramFiles(x86)}\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="$Env:CRP_AUTH_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$Env:COMPUTERNAME --pin=123456
-
+        $authCode = "ใส่รหัสของลักษณ์จาก_GOOGLE_ที่นี่"
+        Invoke-WebRequest -Uri https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi -OutFile crd.msi
+        Start-Process msiexec.exe -Wait -ArgumentList "/i crd.msi /qn"
+        & "${Env:ProgramFiles(x86)}\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="$authCode" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$Env:COMPUTERNAME --pin=123456
     - name: Keep Alive
-      run: |
-        Write-Host "Windows is ready! Check your Chrome Remote Desktop app."
-        Start-Sleep -Seconds 21600
-        
+      run: Start-Sleep -Seconds 21600
